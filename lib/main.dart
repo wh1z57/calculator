@@ -119,7 +119,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     return MyButton(
                       buttonText: buttons[index],
                       color: Colors.white,
-                      textcolor: Colors.black,
+                      textcolor: Colors.blueGrey,
                     );
                   }),
             ),
