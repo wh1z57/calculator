@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'buttons.dart';
+import 'package:math_expressions/math_expressions.dart';
 
 void main() {
   runApp(MyApp());
@@ -28,6 +29,7 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: MyHomePage(title: 'Flutter Demo Home Page'),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -73,6 +75,8 @@ class _MyHomePageState extends State<MyHomePage> {
     '=',
     'ANS',
   ];
+  var userQuestion = '';
+  var userAnswer = '';
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -81,11 +85,38 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+
     return Scaffold(
-      backgroundColor: Colors.grey,
+      backgroundColor: Colors.white,
       body: Column(
         children: <Widget>[
-          Expanded(child: Container()),
+          Expanded(
+              child: Container(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: <Widget>[
+                SizedBox(
+                  height: 50,
+                ),
+                Container(
+                  padding: EdgeInsets.all(20),
+                  child: Text(
+                    userQuestion,
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  alignment: Alignment.centerLeft,
+                ),
+                Container(
+                  padding: EdgeInsets.all(20),
+                  child: Text(
+                    userAnswer,
+                    style: TextStyle(fontSize: 40),
+                  ),
+                  alignment: Alignment.centerLeft,
+                )
+              ],
+            ),
+          )),
           Expanded(
             flex: 2,
             child: Container(
@@ -96,30 +127,75 @@ class _MyHomePageState extends State<MyHomePage> {
                   itemBuilder: (BuildContext context, int index) {
                     if (buttons[index] == 'DEL') {
                       return MyButton(
+                        buttontapped: () {
+                          setState(() {
+                            userQuestion = userQuestion.substring(
+                                0, userQuestion.length - 1);
+                          });
+                        },
                         buttonText: buttons[index],
-                        color: Colors.red,
+                        color: Colors.deepOrange,
                         textcolor: Colors.white,
                       );
                     }
                     if (index == 0) {
                       return MyButton(
+                        buttontapped: () {
+                          setState(() {
+                            userQuestion = '';
+                            userAnswer = '';
+                          });
+                        },
                         buttonText: buttons[index],
                         color: Colors.green,
+                        textcolor: Colors.white,
+                      );
+                    }
+                    if (index == 18) {
+                      return MyButton(
+                        buttontapped: () {
+                          setState(() {
+                            answerEquals();
+                          });
+                        },
+                        buttonText: buttons[index],
+                        color: Colors.black,
+                        textcolor: Colors.white,
+                      );
+                    }
+                    if (index == 19) {
+                      return MyButton(
+                        buttontapped: () {
+                          setState(() {
+                            answerANS();
+                          });
+                        },
+                        buttonText: buttons[index],
+                        color: Colors.black,
                         textcolor: Colors.white,
                       );
                     }
 
                     if (isOperator(buttons[index])) {
                       return MyButton(
-                        buttonText: buttons[index],
-                        color: Colors.black,
-                        textcolor: Colors.white,
-                      );
+                          buttonText: buttons[index],
+                          color: Colors.black,
+                          textcolor: Colors.white,
+                          buttontapped: () {
+                            setState(() {
+                              userQuestion += buttons[index];
+                            });
+                          });
                     }
                     return MyButton(
                       buttonText: buttons[index],
                       color: Colors.white,
                       textcolor: Colors.blueGrey,
+                      buttontapped: () {
+                        setState(() {
+                          userQuestion += buttons[index];
+                        });
+                      },
                     );
                   }),
             ),
@@ -130,14 +206,24 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   bool isOperator(String x) {
-    if (x == '+' ||
-        x == '-' ||
-        x == '*' ||
-        x == '/' ||
-        x == '=' ||
-        x == 'ANS') {
+    if (x == '+' || x == '-' || x == '*' || x == '/') {
       return true;
     }
     return false;
+  }
+
+  void answerEquals() {
+    String equation = userQuestion;
+
+    Parser p = Parser();
+    Expression exp = p.parse(equation);
+    ContextModel cm = ContextModel();
+    double eval = exp.evaluate(EvaluationType.REAL, cm);
+    userAnswer = eval.toString();
+  }
+
+  void answerANS() {
+    String prevAns = userAnswer;
+    userQuestion = prevAns;
   }
 }
